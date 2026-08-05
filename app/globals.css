@@ -35,9 +35,10 @@ html, body {
   font-family: var(--font-sans);
   background: var(--color-bg);
   color: var(--color-text-primary);
-  overflow: hidden;
-  width: 100vw;
-  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 100%;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -195,14 +196,16 @@ html, body {
 
 /* Fullscreen / Expanded Mode */
 .chat-panel.chat-panel-expanded {
-  bottom: 0;
-  right: 0;
+  position: absolute !important;
+  top: 0;
+  left: 0;
   width: 100vw;
-  height: 100vh;
-  max-height: 100vh;
   min-height: 100vh;
+  height: auto;
+  max-height: none;
   border-radius: 0;
   border: none;
+  overflow: visible !important;
   transform: none !important;
 }
 
@@ -432,11 +435,23 @@ html, body {
 .chat-panel-expanded .chat-content-wrapper {
   max-width: 680px;
   width: 100%;
-  height: calc(100vh - 48px);
+  height: auto;
   margin-left: auto;
   margin-right: auto;
-  padding: 8px 0 16px 0;
-  overflow: hidden; /* Prevent vertical window scrollbar */
+  padding: 16px 0 40px 0;
+  overflow: visible !important;
+}
+
+.chat-panel-expanded .chat-container {
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.chat-panel-expanded .messages-area,
+.chat-panel-expanded .messages-area.no-scroll {
+  overflow-y: visible !important;
+  height: auto !important;
+  flex: none !important;
 }
 
 .chat-header-inner {
