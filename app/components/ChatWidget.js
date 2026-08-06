@@ -307,8 +307,8 @@ export default function ChatWidget() {
 
   const addBotGreeting = () => {
     const greeting = userInfo.name
-      ? `Hello! 🖐 Welcome to Aarize Group. How can I help you today, ${userInfo.name}?`
-      : `Hello! 🖐 Welcome to Aarize Group. How can I help you today?`;
+      ? `Hello! 🖐 Welcome to AVA. How can I help you today, ${userInfo.name}?`
+      : `Hello! 🖐 Welcome to AVA. How can I help you today?`;
 
     setMessages([
       {
@@ -440,7 +440,7 @@ export default function ChatWidget() {
       {/* Floating Chat Button */}
       {!isOpen && (
         <div className="chat-button-container">
-          <div className="chat-label">Chat with Aarize →</div>
+          <div className="chat-label">Chat with AVA →</div>
           <button
             className="chat-button"
             onClick={openChat}
@@ -449,7 +449,7 @@ export default function ChatWidget() {
           >
             <span className="chat-button-ping" />
             <div className="chat-button-inner">
-              <ChatIcon />
+              <img src="/avatar.png" alt="Aarize Avatar" className="chat-avatar-img" />
             </div>
           </button>
         </div>
@@ -512,7 +512,7 @@ export default function ChatWidget() {
             {showOnboarding ? (
               /* Onboarding Form */
               <div className="onboarding">
-                <div className="onboarding-title">Welcome to Aarize</div>
+                <div className="onboarding-title">Welcome to AVA</div>
                 <div className="onboarding-subtitle">
                   Share your details so I can assist you better.
                 </div>
@@ -595,7 +595,7 @@ export default function ChatWidget() {
                         <div className="central-heading-logo">
                           <AarizeLogo size={14} color="#000" />
                         </div>
-                        <div className="central-subtitle">Aarize Intelligent Assistant</div>
+                        <div className="central-subtitle">Aarize Virtual Assistant</div>
                       </div>
                     )}
 
@@ -646,7 +646,7 @@ export default function ChatWidget() {
                           <textarea
                             ref={inputRef}
                             className="chat-input"
-                            placeholder="Ask Aarize..."
+                            placeholder="Ask AVA..."
                             value={inputValue}
                             onChange={handleInputChange}
                             onKeyDown={handleKeyDown}
@@ -702,7 +702,7 @@ export default function ChatWidget() {
                         <textarea
                           ref={inputRef}
                           className="chat-input"
-                          placeholder="Ask Aarize..."
+                          placeholder="Ask AVA..."
                           value={inputValue}
                           onChange={handleInputChange}
                           onKeyDown={handleKeyDown}

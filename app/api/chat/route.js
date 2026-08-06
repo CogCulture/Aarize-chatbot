@@ -1,11 +1,11 @@
-import { Mistral } from "@mistralai/mistralai";
+import Anthropic from "@anthropic-ai/sdk";
 import aarizeKnowledge from "@/data/aarize-knowledge";
 
-const client = new Mistral({
-  apiKey: "UDJCZkHTW74vmpEbbQrjqNjeOAv86IA3",
+const client = new Anthropic({
+  apiKey: "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",
 });
 
-const SYSTEM_PROMPT = `You are "Aarize Assistant", the official AI-powered digital assistant for Aarize Group — a leading real estate developer in Gurugram (Gurgaon), Delhi-NCR, India.
+const SYSTEM_PROMPT = `You are "AVA" (Aarize Virtual Assistant), the official AI-powered digital assistant for Aarize Group — a leading real estate developer in Gurugram (Gurgaon), Delhi-NCR, India.
 
 ## YOUR ROLE
 - Answer questions about Aarize Group's projects, services, locations, and company information
@@ -27,7 +27,8 @@ const SYSTEM_PROMPT = `You are "Aarize Assistant", the official AI-powered digit
 4. Always provide relevant links from the Aarize website when mentioning specific projects or pages
 5. When mentioning contact info, always include phone (+91 9464 700 700) and email (sales@aarize.in)
 6. For career-related queries, direct to https://www.aarize.in/careers
-7. Be conversational but always maintain professionalism befitting a premium real estate brand
+8. DO NOT use markdown headings (like #, ##, ###, etc.) in your response. Instead, use bold text (e.g. **Heading**) and bullet points to structure your response.
+9. Be conversational but always maintain professionalism befitting a premium real estate brand
 
 ## AARIZE KNOWLEDGE BASE
 ${aarizeKnowledge}
@@ -45,28 +46,27 @@ export async function POST(request) {
       );
     }
 
-    // Build the conversation with system prompt
-    const conversationMessages = [
-      { role: "system", content: SYSTEM_PROMPT },
-    ];
+    // Build the conversation
+    let systemPrompt = SYSTEM_PROMPT;
 
     // Add user info context if provided
     if (userInfo && (userInfo.name || userInfo.email || userInfo.phone)) {
-      conversationMessages.push({
-        role: "system",
-        content: `The user has shared their details: Name: ${userInfo.name || "Not provided"}, Email: ${userInfo.email || "Not provided"}, Phone: ${userInfo.phone || "Not provided"}. You may use their name to personalize responses.`,
-      });
+      systemPrompt += `\n\n## USER INFO CONTEXT\nThe user has shared their details: Name: ${userInfo.name || "Not provided"}, Email: ${userInfo.email || "Not provided"}, Phone: ${userInfo.phone || "Not provided"}. You may use their name to personalize responses.`;
     }
 
-    // Add conversation history
-    conversationMessages.push(...messages);
+    // Format messages for Anthropic (only keep user and assistant messages, alternate them)
+    const formattedMessages = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
 
-    // Stream response from Mistral
-    const stream = await client.chat.stream({
-      model: "mistral-medium-latest",
-      messages: conversationMessages,
-      temperature: 0.7,
-      maxTokens: 1024,
+    // Stream response from Anthropic
+    const stream = await client.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: formattedMessages,
+      stream: true,
     });
 
     // Create a ReadableStream to stream tokens to the client
@@ -74,17 +74,17 @@ export async function POST(request) {
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
-          for await (const event of stream) {
-            const content = event.data?.choices?.[0]?.delta?.content;
-            if (content) {
+          for await (const chunk of stream) {
+            if (chunk.type === "content_block_delta" && chunk.delta?.text) {
               controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ content })}\n\n`)
+                encoder.encode(`data: ${JSON.stringify({ content: chunk.delta.text })}\n\n`)
               );
             }
           }
           controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           controller.close();
         } catch (err) {
+          console.error("Streaming error:", err);
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({ error: "Stream error occurred" })}\n\n`
@@ -103,7 +103,7 @@ export async function POST(request) {
       },
     });
   } catch (error) {
-    console.error("Mistral API Error:", error);
+    console.error("Anthropic API Error:", error);
     return new Response(
       JSON.stringify({
         error: "Failed to get response from AI. Please try again.",
