@@ -1,6 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import aarizeKnowledge from "@/data/aarize-knowledge";
 
+const client = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY || "",
+});
+
 const SYSTEM_PROMPT = `You are "AVA" (Aarize Virtual Assistant), the official AI-powered digital assistant for Aarize Group — a leading real estate developer in Gurugram (Gurgaon), Delhi-NCR, India.
 
 ## YOUR ROLE
